@@ -100,4 +100,32 @@ object Decoder {
 
   /** Construct a decoder that always decodes a constant value */
   def const[A, B](value: B): Decoder[A, B] = instance(_ ⇒ value.right)
+
+  implicit class TupleOps1[Θ, A](val left: Decoder[Θ, A]) extends AnyVal {
+    def ~[B](right: Decoder[Θ, B]): Decoder[Θ, (A, B)] = left and right
+  }
+
+  implicit class TupleOps2[Θ, A, B](val left: Decoder[Θ, (A, B)]) extends AnyVal {
+    def ~[C](right: Decoder[Θ, C]): Decoder[Θ, (A, B, C)] = (left and right) map {
+      case ((a, b), c) ⇒ (a, b, c)
+    }
+  }
+
+  implicit class TupleOps3[Θ, A, B, C](val left: Decoder[Θ, (A, B, C)]) extends AnyVal {
+    def ~[D](right: Decoder[Θ, D]): Decoder[Θ, (A, B, C, D)] = (left and right) map {
+      case ((a, b, c), d) ⇒ (a, b, c, d)
+    }
+  }
+
+  implicit class TupleOps4[Θ, A, B, C, D](val left: Decoder[Θ, (A, B, C, D)]) extends AnyVal {
+
+    def mapN[Ω](f: (A, B, C, D) ⇒ Ω): Decoder[Θ, Ω] = left map {
+      case (a, b, c, d) ⇒ f(a, b, c, d)
+    }
+
+    def ~[E](right: Decoder[Θ, E]): Decoder[Θ, (A, B, C, D, E)] = (left and right) map {
+      case ((a, b, c, d), e) ⇒ (a, b, c, d, e)
+    }
+  }
+
 }

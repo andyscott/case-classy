@@ -9,9 +9,18 @@ import com.typesafe.config.Config
 import core.Read.{ instance ⇒ read }
 
 package object config {
+
   type ConfigDecoder[A] = core.Decoder[Config, A]
+  type ReadConfig[A] = core.Read[Config, A]
+
   object ConfigDecoder {
     def apply[A](implicit ev: ConfigDecoder[A]): ConfigDecoder[A] = ev
+  }
+
+  object ReadConfig {
+    def apply[A](implicit ev: ReadConfig[A]): ReadConfig[A] = ev
+    def apply[A](key: String)(implicit read: ReadConfig[A]): ConfigDecoder[A] =
+      read(key)
   }
 
   // implicit proxies for the defaults for generic derivation

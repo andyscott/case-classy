@@ -11,7 +11,7 @@ package object classy {
   }
 
   private[classy] implicit class ToEitherOps[A](val a: A) extends AnyVal {
-    def left[B]: Either[A, B] = Left(a)
+    def left[B]: Either[A, B] = Left(   a   )
     def right[B]: Either[B, A] = Right(a)
   }
 

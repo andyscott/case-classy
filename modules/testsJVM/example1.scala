@@ -26,7 +26,7 @@ object Example1 extends App {
    |""".stripMargin
 
   {
-    // Level Zed: Full Black Magic
+    // Zed: Full Black Magic
     import classy.config._
     import classy.generic.auto._
 
@@ -35,7 +35,7 @@ object Example1 extends App {
   }
 
   {
-    // Level Yax: Partial Black Magic
+    // Yax: Partial Black Magic
     import classy.config._
     import classy.generic.deriveDecoder
     import com.typesafe.config.Config
@@ -48,15 +48,15 @@ object Example1 extends App {
   }
 
   {
-    // Level Xan: Has No Magic
+    // Xan: Some Implicit Magic
+    import com.typesafe.config.Config
     import classy.config._
-    import ConfigDecoders.std._
 
-    val decodeA = string("a")
-    val decodeB = int("b").option
-    val decodeC = stringList("c")
-    val decodeBar = string("value").map(value ⇒ Bar(value))
-    val decodeBars = configList("bars") andThen decodeBar.sequence
+    val decodeA = ReadConfig[String]("a")
+    val decodeB = ReadConfig[Int]("b").option
+    val decodeC = ReadConfig[List[String]]("c")
+    val decodeBar = ReadConfig[String]("value").map(value ⇒ Bar(value))
+    val decodeBars = ReadConfig[List[Config]]("bars") andThen decodeBar.sequence
 
     implicit val decodeFoo = (decodeA and decodeB and decodeC and decodeBars).map {
       case (((a, b), c), bar) ⇒ Foo(a, b, c, bar)
@@ -64,6 +64,23 @@ object Example1 extends App {
 
     val res = ConfigDecoder[Foo].decode(typesafeConfig)
     println("Xan: " + res)
+  }
+
+  {
+    // Wat: No magic
+    import classy.config.ConfigDecoder
+    import classy.config.ConfigDecoders.std._
+
+    val decodeA = string("a")
+    val decodeB = int("b").option
+    val decodeC = stringList("c")
+    val decodeBar = string("value").map(value ⇒ Bar(value))
+    val decodeBars = configList("bars") andThen decodeBar.sequence
+
+    implicit val decodeFoo = (decodeA ~ decodeB ~ decodeC ~ decodeBars).mapN(Foo)
+
+    val res = ConfigDecoder[Foo].decode(typesafeConfig)
+    println("Wat: " + res)
   }
 
 }
